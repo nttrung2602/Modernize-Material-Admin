@@ -1,5 +1,12 @@
-import { Box, LinearProgress } from '@mui/material';
-import { DataGrid, GridApi, GridColDef, GridSlots, useGridApiRef } from '@mui/x-data-grid';
+import { Box, Button, LinearProgress, Stack } from '@mui/material';
+import {
+  DataGrid,
+  GridApi,
+  GridColDef,
+  GridEventListener,
+  GridSlots,
+  useGridApiRef,
+} from '@mui/x-data-grid';
 import { useQuery } from '@tanstack/react-query';
 import CustomDataGridFooter from 'components/common/table/CustomDataGridFooter';
 import CustomDataGridProductHeader from 'components/common/table/CustomDataGridHeader';
@@ -12,6 +19,8 @@ import {
 import dayjs from 'dayjs';
 import { ChangeEvent, useEffect, useState } from 'react';
 import SimpleBar from 'simplebar-react';
+import ProducInWarehouseDetailModal from '../modal/modalProductInWarehouseDetailRoleDis';
+import CreatingOrderFormDialog from '../modal/modalCreateOrderRoleDis';
 
 const fetchProducts = async (userId: number): Promise<FlattenedItemInProductRoleDis[]> => {
   const result: ProductTypeOfRoleDis[] = await fetch(
@@ -33,6 +42,18 @@ function flattenData(items: ProductTypeOfRoleDis[]): FlattenedItemInProductRoleD
     distributorFax: item.distributor.fax,
     distributorStatus: item.distributor.status,
     distributorAvtUrl: item.distributor.avtUrl,
+    supplierName: item.supplier?.name ?? null,
+    supplierEmail: item.supplier?.email ?? null,
+    supplierPhoneNumber: item.supplier?.phoneNumber ?? null,
+    supplierAddress: item.supplier?.address ?? null,
+    supplierFax: item.supplier?.fax ?? null,
+    supplierStatus: item.supplier?.status ?? null,
+    supplierAvtUrl: item.supplier?.avtUrl ?? null,
+    supplierTaxCode: item.supplier?.taxCode ?? null,
+    supplierEstablishment: item.supplier?.establishment ?? null,
+    supplierManager: item.supplier?.manager ?? null,
+    supplierActivated: item.supplier?.activated ?? null,
+    supplierDescription: item.supplier?.description ?? null,
     productId: item.product?.productId ?? null,
     productName: item.product?.productName ?? null,
     productQuantity: item.product?.quantity ?? null,
@@ -44,18 +65,60 @@ function flattenData(items: ProductTypeOfRoleDis[]): FlattenedItemInProductRoleD
     productPlantingDate: item.product?.plantingDate ?? null,
     productHarvestDate: item.product?.harvestDate ?? null,
     productSupplierId: item.product?.supplierId ?? null,
+    productBrand: item.product?.productBrand,
+    productOrigin: item.product?.productOrigin,
+    productCertification: item.product?.productCertification,
+    productWeight: item.product?.productWeight,
+    productCommit: item.product?.productCommit,
+    productPlanting: item.product?.productPlanting,
   }));
 }
 export const topProductsColumns: GridColDef<FlattenedItemInProductRoleDis>[] = [
   {
+    field: 'orderProduct',
+    renderCell: (params) => {
+      const [open, setOpen] = useState(false);
+
+      const onClose = () => {
+        setOpen(false);
+
+        // const orderId = params.row.id;
+        // updateApproveOrderStatus.mutate({ orderId });
+      };
+      const handleButton = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation();
+        setOpen(true);
+        // const orderId = params.row.id;
+        // updateApproveOrderStatus.mutate({ orderId });
+      };
+
+      return (
+        <Stack direction="row" spacing={2}>
+          <Button onClick={handleButton} variant="contained">
+            Order
+          </Button>
+          {open && <CreatingOrderFormDialog open={open} onClose={onClose} data={params.row} />}
+        </Stack>
+      );
+    },
+    headerName: 'Action',
+    width: 100,
+  },
+  {
     field: 'productId',
     headerName: 'ProductID',
-    maxWidth: 100,
+    width: 100,
   },
+
   {
     field: 'productName',
     headerName: 'Product Name',
-    maxWidth: 100,
+    width: 100,
+  },
+  {
+    field: 'supplierName',
+    headerName: 'Supplier',
+    width: 100,
   },
   {
     field: 'distributorWarehouseId',
@@ -92,6 +155,8 @@ const ProductsOfDistributorTable = () => {
   const [searchText, setSearchText] = useState('');
   const apiRef = useGridApiRef<GridApi>();
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [selectedData, setSelectedData] = useState<FlattenedItemInProductRoleDis | null>(null);
+  const [openProducInWarehouseDetailModal, setOpenProducInWarehouseDetailModal] = useState(false);
 
   const { data: productsData, isSuccess } = useQuery<FlattenedItemInProductRoleDis[]>({
     queryKey: ['productsDistributor'],
@@ -126,7 +191,14 @@ const ProductsOfDistributorTable = () => {
       apiRef.current.setRows(productsData);
     }
   };
-
+  const handleOpenOrderDetailModal = (value: FlattenedItemInProductRoleDis) => {
+    setSelectedData(value);
+    setOpenProducInWarehouseDetailModal(true);
+  };
+  const handleClose = () => setOpenProducInWarehouseDetailModal(false);
+  const handleRowClick: GridEventListener<'rowClick'> = (params) => {
+    handleOpenOrderDetailModal(params.row);
+  };
   return (
     <Box
       sx={{
@@ -139,10 +211,12 @@ const ProductsOfDistributorTable = () => {
     >
       <SimpleBar>
         <DataGrid
+          onRowClick={handleRowClick}
           getRowId={(row) => row.distributorWarehouseId}
           onResize={() => {
             apiRef.current.autosizeColumns({
-              includeOutliers: true,
+              includeOutliers: false,
+              includeHeaders: true,
             });
           }}
           autoHeight={false}
@@ -164,7 +238,7 @@ const ProductsOfDistributorTable = () => {
           }}
           slotProps={{
             toolbar: {
-              title: 'Top Products',
+              title: 'Current Products',
               flag: 'products',
               value: searchText,
               onChange: handleChange,
@@ -186,6 +260,13 @@ const ProductsOfDistributorTable = () => {
             width: 1,
           }}
         />
+        {openProducInWarehouseDetailModal && (
+          <ProducInWarehouseDetailModal
+            open={openProducInWarehouseDetailModal}
+            onClose={handleClose}
+            productDetail={selectedData}
+          />
+        )}
       </SimpleBar>
     </Box>
   );

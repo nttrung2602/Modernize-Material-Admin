@@ -17,37 +17,120 @@ import CustomDataGridNoRows from 'components/common/table/CustomDataGridNoRows';
 // import { TransactionRowData, transactionTableData } from 'data/dashboard/table';
 import dayjs from 'dayjs';
 
-import { OrderData, UserProfile } from 'data/dashboard/table';
-import OrderDetailModal from '../modal/modalOrderDetail';
+import {
+  FlattenedOrderDataRoleSeller,
+  OrderDataRoleSeller,
+  UserProfile,
+} from 'data/dashboard/table';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import OrderDetailRoleSellerModal from '../modal/modalOrderDetailRoleSeller';
 
-const fetchOrdersDisAndSup = async (userId: number): Promise<OrderData[]> =>
-  await fetch(
-    `${import.meta.env.VITE_SERVER_BASE_URL}/distributors/supplier-transactionId/${userId}`,
+export interface FlattenOrderData {
+  status: string;
+  id: number;
+  distributorId: number;
+  quantity: number;
+  orderedDate: string;
+  sentDate: string;
+  receivedDate: number;
+  warehouseId: number;
+  productId: number;
+  productName: string;
+  productBrand: string;
+  productOrigin: string;
+  productCertification: string;
+  productWeight: string;
+  productCommit: string;
+  productPlanting: string;
+  productQuantity: number;
+  characteristic: string;
+  seed: string;
+  cook: string;
+  note: string;
+  image: string;
+  plantingDate: string;
+  harvestDate: string;
+  supplierId: number;
+}
+
+const fetchOrdersDisAndSup = async (userId: number): Promise<FlattenedOrderDataRoleSeller[]> => {
+  const result: OrderDataRoleSeller[] = await fetch(
+    `${import.meta.env.VITE_SERVER_BASE_URL}/sellers/distributor-transactions/${userId}`,
   ).then((res) => {
     return res.json();
   });
+  return flattenData(result);
+};
+
+function flattenData(items: OrderDataRoleSeller[]): FlattenedOrderDataRoleSeller[] {
+  return items.map((item) => ({
+    id: item.id,
+    quantity: item.quantity,
+    distributorName: item.distributor.name,
+    distributorEmail: item.distributor.email,
+    distributorPhoneNumber: item.distributor.phoneNumber,
+    distributorAddress: item.distributor.address,
+    distributorFax: item.distributor.fax,
+    distributorStatus: item.distributor.status,
+    distributorAvtUrl: item.distributor.avtUrl,
+    supplierName: item.product?.supplier.name ?? null,
+    supplierEmail: item.product?.supplier.email ?? null,
+    supplierPhoneNumber: item.product?.supplier.phoneNumber ?? null,
+    supplierAddress: item.product?.supplier.address ?? null,
+    supplierFax: item.product?.supplier.fax ?? null,
+    supplierStatus: item.product?.supplier.status ?? null,
+    supplierAvtUrl: item.product?.supplier.avtUrl ?? null,
+    supplierTaxCode: item.product?.supplier.taxCode ?? null,
+    supplierEstablishment: item.product?.supplier.establishment ?? null,
+    supplierManager: item.product?.supplier.manager ?? null,
+    supplierActivated: item.product?.supplier.activated ?? null,
+    supplierDescription: item.product?.supplier.description ?? null,
+    productId: item.product?.productId ?? null,
+    productName: item.product?.productName ?? null,
+    productQuantity: item.product?.quantity ?? null,
+    productCharacteristic: item.product?.characteristic ?? null,
+    productSeed: item.product?.seed ?? null,
+    productCook: item.product?.cook ?? null,
+    productNote: item.product?.note ?? null,
+    productImage: item.product?.image ?? null,
+    productPlantingDate: item.product?.plantingDate ?? null,
+    productHarvestDate: item.product?.harvestDate ?? null,
+    productSupplierId: item.product?.supplierId ?? null,
+    productBrand: item.product?.productBrand ?? null,
+    productOrigin: item.product?.productOrigin ?? null,
+    productCertification: item.product?.productCertification ?? null,
+    productWeight: item.product?.productWeight ?? null,
+    productCommit: item.product?.productCommit ?? null,
+    productPlanting: item.product?.productPlanting ?? null,
+    status: item.status,
+    orderedDate: item.orderedDate,
+    receivedDate: item.receivedDate ?? null,
+    sentDate: item.sentDate ?? null,
+  }));
+}
 const handleReceiveOrderStatus = async (orderId: number) =>
-  await fetch(`${import.meta.env.VITE_SERVER_BASE_URL}/distributors/received`, {
+  await fetch(`${import.meta.env.VITE_SERVER_BASE_URL}/sellers/received/${orderId}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      id: orderId,
-    }),
   }).then((res) => {
     return res.json();
   });
 
-export const orderColumns: GridColDef<OrderData>[] = [
+export const orderColumns: GridColDef<FlattenedOrderDataRoleSeller>[] = [
   {
     field: 'id',
     renderCell: (params) => {
       return <Typography sx={{ fontWeight: 500 }}>{params.value}</Typography>;
     },
     headerName: 'Order ID',
+    width: 100,
+  },
+  {
+    field: 'productName',
+    headerName: 'Product Name',
     width: 100,
   },
   {
@@ -147,15 +230,15 @@ export const orderColumns: GridColDef<OrderData>[] = [
   },
 ];
 
-const OrdersSuppliersTable = () => {
+const OrdersFromSellerToDisTable = () => {
   const [openOrderDetailModal, setOpenOrderDetailModal] = useState(false);
-  const [selectedData, setSelectedData] = useState<OrderData | null>(null);
+  const [selectedData, setSelectedData] = useState<FlattenedOrderDataRoleSeller | null>(null);
   const [searchText, setSearchText] = useState('');
   const apiRef = useGridApiRef<GridApi>();
   const [user, setUser] = useState<UserProfile | null>(null);
 
-  const { isError, isLoading, data, isSuccess } = useQuery<OrderData[]>({
-    queryKey: ['ordersSupplier'],
+  const { isError, isLoading, data, isSuccess } = useQuery<FlattenedOrderDataRoleSeller[]>({
+    queryKey: ['ordersDistributor'],
     queryFn: () => fetchOrdersDisAndSup(user!.id),
     // staleTime: 1000 * 60 * 5,
   });
@@ -186,7 +269,7 @@ const OrdersSuppliersTable = () => {
     return <Typography>Lỗi tải dữ liệu</Typography>;
   }
 
-  const handleOpenOrderDetailModal = (value: OrderData) => {
+  const handleOpenOrderDetailModal = (value: FlattenedOrderDataRoleSeller) => {
     setSelectedData(value);
     setOpenOrderDetailModal(true);
   };
@@ -242,7 +325,7 @@ const OrdersSuppliersTable = () => {
           }}
           slotProps={{
             toolbar: {
-              title: "Supplier's Orders",
+              title: 'My Orders',
               flag: 'user',
               value: searchText,
               onChange: handleChange,
@@ -262,10 +345,10 @@ const OrdersSuppliersTable = () => {
           }}
         />
         {openOrderDetailModal && (
-          <OrderDetailModal
+          <OrderDetailRoleSellerModal
             open={openOrderDetailModal}
             onClose={handleClose}
-            orderDetail={selectedData}
+            data={selectedData}
           />
         )}
       </SimpleBar>
@@ -273,4 +356,4 @@ const OrdersSuppliersTable = () => {
   );
 };
 
-export default OrdersSuppliersTable;
+export default OrdersFromSellerToDisTable;

@@ -1,7 +1,7 @@
 import { IconButton, Stack, TextField, Typography } from '@mui/material';
 import { GridSlotsComponentsProps } from '@mui/x-data-grid';
 import IconifyIcon from 'components/base/IconifyIcon';
-// import CreatingOrderFormDialog from 'components/sections/dashboard/modal/modalCreateOrderRoleDis';
+import CreatingProductFormDialog from 'components/sections/dashboard/modal/modalCreateProductRoleSup';
 
 const CustomDataGridProductHeader = (props: NonNullable<GridSlotsComponentsProps['toolbar']>) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -23,7 +23,7 @@ const CustomDataGridProductHeader = (props: NonNullable<GridSlotsComponentsProps
       <Typography variant="h6" sx={{ flex: 1, typography: { whiteSpace: 'nowrap' } }}>
         {props.title}
       </Typography>
-      {/* <CreatingOrderFormDialog /> */}
+      <CreatingProductFormDialog />
       <TextField
         type="text"
         size="small"

@@ -172,10 +172,7 @@ const LoginForm: React.FC = () => {
       authentication(email, password, role),
     onSuccess: (data) => {
       // console.log('data', data);
-      localStorage.setItem(
-        'user',
-        JSON.stringify({ email: data.email, role: data.role, id: data.id }),
-      );
+      localStorage.setItem('user', JSON.stringify(data));
       navigate(paths.default);
     },
   });

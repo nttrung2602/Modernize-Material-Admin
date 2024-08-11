@@ -2,8 +2,9 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
-import { DistributorProfileType, OrderData } from 'data/dashboard/table';
+import { DistributorProfileType } from 'data/dashboard/table';
 import { useQuery } from '@tanstack/react-query';
+import { FlattenOrderData } from '../transactions/OrdersToSupplierTransactionTableRoleDistributor';
 
 const style = {
   position: 'absolute',
@@ -19,7 +20,7 @@ const style = {
 
 interface Props {
   open: boolean;
-  orderDetail?: OrderData | null;
+  orderDetail?: FlattenOrderData | null;
   onClose: () => void;
 }
 
@@ -55,10 +56,10 @@ export default function OrderDetailModal(props: Props) {
           </Typography>
           <Typography id="modal-modal-description">Mã đơn hàng: {orderDetail?.id}</Typography>
           <Typography id="modal-modal-description" sx={{ mt: 1 }}>
-            Mã sản phẩm: {orderDetail?.product.productId}
+            Mã sản phẩm: {orderDetail?.productId}
           </Typography>
           <Typography id="modal-modal-description" sx={{ mt: 1 }}>
-            Tên sản phẩm: {orderDetail?.product.productName}
+            Tên sản phẩm: {orderDetail?.productName}
           </Typography>
           <Typography id="modal-modal-description" sx={{ mt: 1 }}>
             Số lượng: {orderDetail?.quantity}

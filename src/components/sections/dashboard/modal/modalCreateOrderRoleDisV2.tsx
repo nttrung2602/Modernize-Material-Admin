@@ -5,15 +5,13 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import { FlattenedItemInProductRoleDis, UserProfile } from 'data/dashboard/table';
+import { FlattenedItemAllProducstOfAllSuppliersResponse, UserProfile } from 'data/dashboard/table';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-// import { SupplierProfile } from 'data/dashboard/table';
-// import { useQuery } from '@tanstack/react-query';
 
 export interface Props {
   open: boolean;
-  data: FlattenedItemInProductRoleDis;
+  data: FlattenedItemAllProducstOfAllSuppliersResponse;
   onClose: () => void;
 }
 const handleOrderProduct = async (
@@ -63,7 +61,6 @@ export default function CreatingOrderFormDialog({ open, data, onClose }: Props) 
       queryClient.invalidateQueries({
         queryKey: ['ordersSupplier'],
       });
-
       toast.success(`Create Order ${data.productName} successful!`);
     },
   });

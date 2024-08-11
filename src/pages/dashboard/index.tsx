@@ -3,9 +3,9 @@ import PageHeader from 'components/common/PageHeader';
 import TeamMembers from 'components/sections/dashboard/members/TeamMembers';
 import StatisticsCards from 'components/sections/dashboard/statistics/StatisticCards';
 import ProductsOfSupplierTable from 'components/sections/dashboard/topProducts/TopProductsTable';
-import ProductsOfDistributorTable from 'components/sections/dashboard/topProducts/TopProductsTableRoleDis';
 import OrdersSellerTable from 'components/sections/dashboard/transactions/OrdersFromSellerTransactionTableRoleDistributor';
-import OrdersSuppliersTable from 'components/sections/dashboard/transactions/OrdersFromSupplierTransactionTableRoleDistributor';
+import OrdersFromSellerToDisTable from 'components/sections/dashboard/transactions/OrdersToDistributorTransactionTableRoleSeller';
+import OrdersSuppliersTable from 'components/sections/dashboard/transactions/OrdersToSupplierTransactionTableRoleDistributor';
 import OrdersDistributorsTable from 'components/sections/dashboard/transactions/TransactionTableRoleSupplier';
 import { UserProfile } from 'data/dashboard/table';
 import { useEffect, useState } from 'react';
@@ -13,6 +13,9 @@ import { useNavigate } from 'react-router-dom';
 import paths from 'routes/path';
 
 // const role: string = 'distributor';
+// const user = { role: 'supplier' };
+// const user = { role: 'distributor' };
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<UserProfile>();
@@ -46,9 +49,9 @@ const Dashboard = () => {
           <Grid item xs={1} zIndex={1}>
             <OrdersDistributorsTable />
           </Grid>
-          <Grid item xs={1}>
+          {/* <Grid item xs={1}>
             <ProductsOfSupplierTable />
-          </Grid>
+          </Grid> */}
         </Grid>
         {/* /* ------------- Team section ---------------- */}
         <Grid container spacing={3} mb={3}>
@@ -81,8 +84,37 @@ const Dashboard = () => {
           <Grid item xs={1} zIndex={1}>
             <OrdersSellerTable />
           </Grid>
-          <Grid item xs={1}>
-            <ProductsOfDistributorTable />
+        </Grid>
+        {/* /* ------------- Team section ---------------- */}
+        <Grid container spacing={3} mb={3}>
+          <Grid item xs={12} md={12} xl={4}>
+            <TeamMembers />
+          </Grid>
+        </Grid>
+      </Box>
+    );
+  } else {
+    return (
+      <Box
+        sx={{
+          pb: 1,
+        }}
+      >
+        <PageHeader>Dashboard</PageHeader>
+        {/* /* ------------- Stats section ---------------- */}
+
+        <Grid container spacing={3} mt={1} mb={3}>
+          <Grid item xs={12} lg={12}>
+            <StatisticsCards />
+          </Grid>
+        </Grid>
+        {/* /* ------------- Table section ---------------- */}
+        <Grid container spacing={1} mb={3} columns={1}>
+          <Grid item xs={1} zIndex={1}>
+            <OrdersFromSellerToDisTable />
+          </Grid>
+          <Grid item xs={1} zIndex={1}>
+            {/* <OrdersSellerTable /> */}
           </Grid>
         </Grid>
         {/* /* ------------- Team section ---------------- */}

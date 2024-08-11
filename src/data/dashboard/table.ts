@@ -51,9 +51,9 @@ export interface DistributorProfile {
   status: boolean;
   avtUrl: string;
 }
-
 export interface SupplierProfile {
   supplierId: number;
+  role: string;
   name: string;
   email: string;
   phoneNumber: string;
@@ -61,7 +61,13 @@ export interface SupplierProfile {
   fax: string;
   status: boolean;
   avtUrl: string;
+  taxCode: string;
+  establishment: string;
+  manager: string;
+  activated: string;
+  description: string;
 }
+
 export interface UserProfile {
   role: string;
   id: number;
@@ -87,6 +93,12 @@ export interface OrderSellerData {
 export interface ProductType {
   productId: number;
   productName: string;
+  productBrand: string;
+  productOrigin: string;
+  productCertification: string;
+  productWeight: string;
+  productCommit: string;
+  productPlanting: string;
   quantity: number;
   characteristic: string;
   seed: string;
@@ -100,8 +112,9 @@ export interface ProductType {
 export interface ProductTypeOfRoleDis {
   distributorWarehouseId: number;
   quantity: number;
-  product: ProductType2;
+  product: ProductType;
   distributor: DistributorProfile;
+  supplier: SupplierProfile;
 }
 // export interface UpdatedOrderInfoData {
 //   id: number;
@@ -109,9 +122,15 @@ export interface ProductTypeOfRoleDis {
 //   distributorId: string;
 //   quantity: number;
 // }
-export interface ProductType2 {
+export interface AllProducstOfAllSuppliersResponse {
   productId: number;
   productName: string;
+  productBrand: string;
+  productOrigin: string;
+  productCertification: string;
+  productWeight: string;
+  productCommit: string;
+  productPlanting: string;
   quantity: number;
   characteristic: string;
   seed: string;
@@ -121,6 +140,7 @@ export interface ProductType2 {
   plantingDate: string;
   harvestDate: string;
   supplierId: number;
+  supplier: SupplierProfile;
 }
 
 export interface FlattenedItemInProductRoleDis {
@@ -133,6 +153,13 @@ export interface FlattenedItemInProductRoleDis {
   distributorFax: string;
   distributorStatus: boolean;
   distributorAvtUrl: string;
+  supplierName: string;
+  supplierEmail: string;
+  supplierPhoneNumber: string;
+  supplierAddress: string;
+  supplierFax: string;
+  supplierStatus: boolean;
+  supplierAvtUrl: string;
   productId: number | null;
   productName: string | null;
   productQuantity: number | null;
@@ -144,7 +171,239 @@ export interface FlattenedItemInProductRoleDis {
   productPlantingDate: string | null;
   productHarvestDate: string | null;
   productSupplierId: number | null;
+  productBrand: string | null;
+  productOrigin: string | null;
+  productCertification: string | null;
+  productWeight: string | null;
+  productCommit: string | null;
+  productPlanting: string | null;
 }
+
+export interface FlattenedItemAllProducstOfAllSuppliersResponse {
+  quantity: number;
+  supplierName: string;
+  supplierEmail: string;
+  supplierPhoneNumber: string;
+  supplierAddress: string;
+  supplierFax: string;
+  supplierStatus: boolean;
+  supplierAvtUrl: string;
+  productId: number | null;
+  productName: string | null;
+  productQuantity: number | null;
+  productCharacteristic: string | null;
+  productSeed: string | null;
+  productCook: string | null;
+  productNote: string | null;
+  productImage: string | null;
+  productPlantingDate: string | null;
+  productHarvestDate: string | null;
+  productSupplierId: number | null;
+  productBrand: string | null;
+  productOrigin: string | null;
+  productCertification: string | null;
+  productWeight: string | null;
+  productCommit: string | null;
+  productPlanting: string | null;
+}
+
+export interface FlattenedOrderDataRoleSeller {
+  id: number;
+  quantity: number;
+  distributorName: string;
+  distributorEmail: string;
+  distributorPhoneNumber: string;
+  distributorAddress: string;
+  distributorFax: string;
+  distributorStatus: boolean;
+  distributorAvtUrl: string;
+  supplierName: string | null;
+  supplierEmail: string | null;
+  supplierPhoneNumber: string | null;
+  supplierAddress: string | null;
+  supplierFax: string | null;
+  supplierStatus: boolean | null;
+  supplierAvtUrl: string | null;
+  supplierTaxCode: string | null;
+  supplierEstablishment: string | null;
+  supplierManager: string | null;
+  supplierActivated: string | null;
+  supplierDescription: string | null;
+  productName: string | null;
+  productQuantity: number | null;
+  productCharacteristic: string | null;
+  productSeed: string | null;
+  productCook: string | null;
+  productNote: string | null;
+  productImage: string | null;
+  productPlantingDate: string | null;
+  productHarvestDate: string | null;
+  productSupplierId: number | null;
+  productBrand: string | null;
+  productOrigin: string | null;
+  productCertification: string | null;
+  productWeight: string | null;
+  productCommit: string | null;
+  productPlanting: string | null;
+  status: string;
+  orderedDate: string;
+  receivedDate: string | null;
+  sentDate: string | null;
+}
+
+export interface OrderDataRoleSeller {
+  id: number;
+  distributorWarehouseId: number;
+  distributor: DistributorProfile;
+  product?: ProductTypeInRoleSeller;
+  sellerId: number;
+  quantity: number;
+  orderedDate: string;
+  sentDate: string;
+  receivedDate?: string;
+  status: string;
+  sellerWarehouseId: number;
+}
+
+export interface ProductTypeInRoleSeller {
+  productId: number;
+  productName: string;
+  productBrand: string;
+  productOrigin: string;
+  productCertification: string;
+  productWeight: string;
+  productCommit: string;
+  productPlanting: string;
+  quantity: number;
+  characteristic: string;
+  seed: string;
+  cook: string;
+  note: string;
+  image: string;
+  plantingDate: string;
+  harvestDate: string;
+  supplierId: number;
+  supplier: SupplierProfile;
+}
+
+export interface FlattenedProductInWarehouseRoleSeller {
+  sellerWarehouseId: number;
+  distributorWarehouseId: number;
+  quantity: number;
+  distributorName: string;
+  distributorEmail: string;
+  distributorPhoneNumber: string;
+  distributorAddress: string;
+  distributorFax: string;
+  distributorStatus: boolean;
+  distributorAvtUrl: string;
+  supplierName: string;
+  supplierEmail: string;
+  supplierPhoneNumber: string;
+  supplierAddress: string;
+  supplierFax: string;
+  supplierStatus: boolean;
+  supplierAvtUrl: string;
+  supplierTaxCode: string | null;
+  supplierEstablishment: string | null;
+  supplierManager: string | null;
+  supplierActivated: string | null;
+  supplierDescription: string | null;
+  productId: number | null;
+  productName: string | null;
+  productQuantity: number | null;
+  productCharacteristic: string | null;
+  productSeed: string | null;
+  productCook: string | null;
+  productNote: string | null;
+  productImage: string | null;
+  productPlantingDate: string | null;
+  productHarvestDate: string | null;
+  productSupplierId: number | null;
+  productBrand: string | null;
+  productOrigin: string | null;
+  productCertification: string | null;
+  productWeight: string | null;
+  productCommit: string | null;
+  productPlanting: string | null;
+}
+export interface ProductInWarehouseRoleSeller {
+  sellerWarehouseId: number;
+  quantity: number;
+  product: ProductTypeInRoleSeller;
+  distributor: DistributorProfile;
+  distributorWarehouseId: number;
+}
+
+export interface DistributorWarehouse {
+  warehouseId: number;
+  quantity: number;
+  supToDis: SupToDis;
+  distributor: DistributorProfile;
+}
+
+export interface SupToDis {
+  id: number;
+  product: ProductTypeInRoleSeller;
+}
+export interface FlattenedItemAllProducstOfAllDistributorResponse {
+  warehouseId: number;
+  quantity: number;
+  distributorName: string;
+  distributorEmail: string;
+  distributorPhoneNumber: string;
+  distributorAddress: string;
+  distributorFax: string;
+  distributorStatus: boolean;
+  distributorAvtUrl: string;
+  supplierName: string | null;
+  supplierEmail: string | null;
+  supplierPhoneNumber: string | null;
+  supplierAddress: string | null;
+  supplierFax: string | null;
+  supplierStatus: boolean | null;
+  supplierAvtUrl: string | null;
+  supplierTaxCode: string | null;
+  supplierEstablishment: string | null;
+  supplierManager: string | null;
+  supplierActivated: string | null;
+  supplierDescription: string | null;
+  productName: string | null;
+  productQuantity: number | null;
+  productCharacteristic: string | null;
+  productSeed: string | null;
+  productCook: string | null;
+  productNote: string | null;
+  productImage: string | null;
+  productPlantingDate: string | null;
+  productHarvestDate: string | null;
+  productSupplierId: number | null;
+  productBrand: string | null;
+  productOrigin: string | null;
+  productCertification: string | null;
+  productWeight: string | null;
+  productCommit: string | null;
+  productPlanting: string | null;
+}
+
+export interface ProductForm {
+  productName: string;
+  productBrand: string;
+  productOrigin: string;
+  productCertification: string;
+  productWeight: string;
+  productCommit: string;
+  productPlanting: string;
+  quantity: number;
+  characteristic: string;
+  seed: string;
+  cook: string;
+  note: string;
+  image: string;
+  plantingDate: string;
+  harvestDate: string;
+}
+// sample
 export interface TopProductsRowData {
   id: string;
   supp_id: string;

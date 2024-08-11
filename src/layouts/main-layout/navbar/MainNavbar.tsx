@@ -32,7 +32,7 @@ const MainNavbar = ({ onDrawerToggle }: MainNavbarProps) => {
               gap: 1.5,
             }}
           >
-            <Logo sx={{ fontSize: 40, p: 1 }} />
+            <Logo />
           </Link>
           <IconButton
             color="inherit"

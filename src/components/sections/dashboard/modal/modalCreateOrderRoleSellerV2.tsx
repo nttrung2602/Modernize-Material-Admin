@@ -5,7 +5,10 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import { FlattenedItemInProductRoleDis, UserProfile } from 'data/dashboard/table';
+import {
+  FlattenedItemAllProducstOfAllDistributorResponse,
+  UserProfile,
+} from 'data/dashboard/table';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 // import { SupplierProfile } from 'data/dashboard/table';
@@ -13,27 +16,36 @@ import { toast } from 'react-toastify';
 
 export interface Props {
   open: boolean;
-  data: FlattenedItemInProductRoleDis;
+  data: FlattenedItemAllProducstOfAllDistributorResponse;
   onClose: () => void;
 }
 const handleOrderProduct = async (
   quantity: number,
-  productId?: number | null,
-  distributorId?: number | null,
-) =>
-  await fetch(`${import.meta.env.VITE_SERVER_BASE_URL}/distributors/order`, {
+  warehouseId?: number | null,
+  sellerId?: number | null,
+) => {
+  console.log(
+    'dataaa',
+    JSON.stringify({
+      warehouseId,
+      sellerId,
+      quantity,
+    }),
+  );
+  return await fetch(`${import.meta.env.VITE_SERVER_BASE_URL}/sellers/order`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      productId,
-      distributorId,
+      warehouseId,
+      sellerId,
       quantity,
     }),
   }).then((res) => {
     return res.json();
   });
+};
 
 export default function CreatingOrderFormDialog({ open, data, onClose }: Props) {
   const queryClient = useQueryClient();
@@ -47,24 +59,25 @@ export default function CreatingOrderFormDialog({ open, data, onClose }: Props) 
   const creatingOrderProduct = useMutation({
     mutationFn: ({
       quantity,
-
-      productId,
-
-      distributorId,
+      warehouseId,
+      sellerId,
     }: {
-      distributorId?: number | null;
+      sellerId?: number | null;
       quantity: number;
-      productId?: number | null;
-    }) => handleOrderProduct(quantity, productId, distributorId),
+      warehouseId?: number | null;
+    }) => handleOrderProduct(quantity, warehouseId, sellerId),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['productsDistributor'],
+        queryKey: ['productsSeller'],
       });
       queryClient.invalidateQueries({
-        queryKey: ['ordersSupplier'],
+        queryKey: ['ordersDistributor'],
       });
-
       toast.success(`Create Order ${data.productName} successful!`);
+      onClose();
+    },
+    onError: (error) => {
+      toast.error(`Failed Order ${error.message}!`);
     },
   });
   return (
@@ -80,12 +93,12 @@ export default function CreatingOrderFormDialog({ open, data, onClose }: Props) 
             const formData = new FormData(event.currentTarget);
             const formJson = Object.fromEntries(formData.entries());
             // console.log(formJson);
+
             creatingOrderProduct.mutate({
-              distributorId: user?.id,
               quantity: Number(formJson.quantity),
-              productId: data.productId,
+              warehouseId: data.warehouseId,
+              sellerId: user?.id,
             });
-            onClose();
           },
         }}
       >
@@ -105,12 +118,12 @@ export default function CreatingOrderFormDialog({ open, data, onClose }: Props) 
 
           <TextField
             disabled
-            value={data.supplierName}
+            value={data.distributorName}
             autoFocus
             margin="dense"
-            id="supplier"
-            name="supplier"
-            label="Supplier"
+            id="distributor"
+            name="distributor"
+            label="Distributor"
             fullWidth
             variant="outlined"
           />

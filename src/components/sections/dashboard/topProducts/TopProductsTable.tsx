@@ -2,7 +2,7 @@ import { Box, LinearProgress } from '@mui/material';
 import { DataGrid, GridApi, GridColDef, GridSlots, useGridApiRef } from '@mui/x-data-grid';
 import { useQuery } from '@tanstack/react-query';
 import CustomDataGridFooter from 'components/common/table/CustomDataGridFooter';
-import CustomDataGridProductHeader from 'components/common/table/CustomDataGridHeader';
+import CustomDataGridProductHeader from 'components/common/table/CustomDataGridProductHeaderRoleDSup';
 import CustomDataGridNoRows from 'components/common/table/CustomDataGridNoRows';
 import { ProductType, UserProfile } from 'data/dashboard/table';
 import dayjs from 'dayjs';
@@ -117,7 +117,7 @@ const ProductsOfSupplierTable = () => {
           }}
           slotProps={{
             toolbar: {
-              title: 'Top Products',
+              title: 'Products',
               flag: 'products',
               value: searchText,
               onChange: handleChange,

@@ -11,22 +11,38 @@ import {
 } from '@mui/material';
 import AvatarImage from 'assets/images/avatar.svg';
 import IconifyIcon from 'components/base/IconifyIcon';
+import UserProfileDialog from 'components/sections/dashboard/modal/modalUserProfile';
+import { UserProfile } from 'data/dashboard/table';
 import { profileOptions } from 'data/navbar/menu-data';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import paths from 'routes/path';
 
 const ProfileDropdown = () => {
   const navigate = useNavigate();
+  const [user, setUser] = useState<UserProfile | null>(null);
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const open = Boolean(anchorEl);
+  const [openModal, setOpenModal] = useState(false);
+
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
+  };
+  useEffect(() => {
+    const userData = JSON.parse(localStorage!.getItem('user')!) as UserProfile;
+
+    setUser(userData);
+  }, []);
+
+  const handleOpen = () => {
+    setAnchorEl(null);
+    setOpenModal(true);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
+    setOpenModal(false);
   };
   return (
     <Box
@@ -60,7 +76,7 @@ const ProfileDropdown = () => {
               display: { xs: 'none', sm: 'block' },
             }}
           >
-            X’eriya Ponald
+            {user?.email.split('@', 1)}
           </Typography>
         </Stack>
       </ButtonBase>
@@ -88,7 +104,7 @@ const ProfileDropdown = () => {
               py: 1,
               px: 1.5,
             }}
-            onClick={handleClose}
+            onClick={handleOpen}
           >
             <ListItemIcon sx={{ '&.MuiListItemIcon-root': { minWidth: 2, mr: 1 } }}>
               <IconifyIcon width={16} height={16} icon={option.icon} />
@@ -114,6 +130,7 @@ const ProfileDropdown = () => {
           </Button>
         </Stack>
       </Menu>
+      <UserProfileDialog open={openModal} onClose={handleClose} />
     </Box>
   );
 };

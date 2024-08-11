@@ -21,7 +21,7 @@ const NavMenuItem = ({ item, pathTo }: NavMenuItemType) => {
       <ListItemButton
         component={Link}
         href={item?.href}
-        disabled={item?.disabled}
+        disabled={item?.disable}
         selected={pathTo === item?.href}
       >
         <ListItemIcon

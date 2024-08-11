@@ -11,7 +11,7 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import SimpleBar from 'simplebar-react';
 
 import CustomDataGridFooter from 'components/common/table/CustomDataGridFooter';
-import CustomDataGridHeader from 'components/common/table/CustomDataGridHeader';
+import CustomDataGridHeader from 'components/common/table/CustomDataGridProductHeaderRoleDistributor';
 import CustomDataGridNoRows from 'components/common/table/CustomDataGridNoRows';
 
 // import { TransactionRowData, transactionTableData } from 'data/dashboard/table';
@@ -21,66 +21,75 @@ import { OrderData, UserProfile } from 'data/dashboard/table';
 import OrderDetailModal from '../modal/modalOrderDetail';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import { flattenData, FlattenOrderData } from './OrdersToSupplierTransactionTableRoleDistributor';
 
-const fetchOrders = async (userId: number): Promise<FlattenOrderData[]> => {
+export interface FlattenOrderData {
+  status: string;
+  id: number;
+  distributorId: number;
+  quantity: number;
+  orderedDate: string;
+  sentDate: string;
+  receivedDate: number;
+  warehouseId: number;
+  productId: number;
+  productName: string;
+  productBrand: string;
+  productOrigin: string;
+  productCertification: string;
+  productWeight: string;
+  productCommit: string;
+  productPlanting: string;
+  productQuantity: number;
+  characteristic: string;
+  seed: string;
+  cook: string;
+  note: string;
+  image: string;
+  plantingDate: string;
+  harvestDate: string;
+  supplierId: number;
+}
+
+const fetchOrdersDisAndSup = async (userId: number): Promise<FlattenOrderData[]> => {
   const result: OrderData[] = await fetch(
-    `${import.meta.env.VITE_SERVER_BASE_URL}/suppliers/transactions/${userId}`,
+    `${import.meta.env.VITE_SERVER_BASE_URL}/distributors/supplier-transactionId/${userId}`,
   ).then((res) => {
     return res.json();
   });
   return flattenData(result);
 };
 
-const handleSendingOrderStatus = async (
-  orderId: number,
-  productId: number,
-  distributorId: number,
-  quantity: number,
-) =>
-  await fetch(`${import.meta.env.VITE_SERVER_BASE_URL}/suppliers/send-product`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      id: orderId,
-      productId: productId,
-      distributorId: distributorId,
-      quantity: quantity,
-    }),
-  }).then((res) => {
-    return res.json();
-  });
-
-const handleRejectOrderStatus = async (orderId: number) => {
-  console.log('orderid', orderId);
-  return await fetch(`${import.meta.env.VITE_SERVER_BASE_URL}/suppliers/reject`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      id: orderId,
-    }),
-  }).then((res) => {
-    return res.json();
-  });
-};
-// await fetch(`${import.meta.env.VITE_SERVER_BASE_URL}/suppliers/send-product`, {
-//   method: 'POST',
-//   headers: {
-//     'Content-Type': 'application/json',
-//   },
-//   body: JSON.stringify({
-//     id: orderId,
-//   }),
-// }).then((res) => {
-//   return res.json();
-// });
-
-const handleApproveOrderStatus = async (orderId: number) =>
-  await fetch(`${import.meta.env.VITE_SERVER_BASE_URL}/suppliers/approve`, {
+export function flattenData(items: OrderData[]): FlattenOrderData[] {
+  return items.map((item) => ({
+    status: item.status,
+    id: item.id,
+    quantity: item.quantity,
+    distributorId: item.distributorId,
+    orderedDate: item.orderedDate,
+    sentDate: item.sentDate,
+    receivedDate: item.receivedDate,
+    warehouseId: item.warehouseId,
+    productId: item.product?.productId ?? null,
+    productName: item.product?.productName ?? null,
+    productQuantity: item.product?.quantity ?? null,
+    characteristic: item.product?.characteristic ?? null,
+    seed: item.product?.seed ?? null,
+    cook: item.product?.cook ?? null,
+    note: item.product?.note ?? null,
+    image: item.product?.image ?? null,
+    plantingDate: item.product?.plantingDate ?? null,
+    harvestDate: item.product?.harvestDate ?? null,
+    supplierId: item.product?.supplierId ?? null,
+    productBrand: item.product?.productBrand,
+    productOrigin: item.product?.productOrigin,
+    productCertification: item.product?.productCertification,
+    productWeight: item.product?.productWeight,
+    productCommit: item.product?.productCommit,
+    productPlanting: item.product?.productPlanting,
+  }));
+}
+const handleReceiveOrderStatus = async (orderId: number) =>
+  await fetch(`${import.meta.env.VITE_SERVER_BASE_URL}/distributors/received`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -92,7 +101,7 @@ const handleApproveOrderStatus = async (orderId: number) =>
     return res.json();
   });
 
-export const orderColumns: GridColDef<OrderData>[] = [
+export const orderColumns: GridColDef<FlattenOrderData>[] = [
   {
     field: 'id',
     renderCell: (params) => {
@@ -160,112 +169,40 @@ export const orderColumns: GridColDef<OrderData>[] = [
     renderCell: (params) => {
       const colors: 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' | 'inherit' =
         'success';
-      const [approvedButton, setApproveButton] = useState(true);
-      const [sendingButton, setSendingButton] = useState(true);
-      const [canceledButton, setCanceledButton] = useState(true);
+      const [receiveButton, setReceiveButton] = useState(true);
       const queryClient = useQueryClient();
       useEffect(() => {
-        if (params.row.status === 'pending') {
-          setSendingButton(false);
-        } else if (params.row.status === 'approved') {
-          setApproveButton(false);
-          setSendingButton(true);
-          setCanceledButton(false);
-        } else if (
-          params.row.status === 'received' ||
-          params.row.status === 'sending' ||
-          params.row.status === 'rejected'
-        ) {
-          setApproveButton(false);
-          setSendingButton(false);
-          setCanceledButton(false);
+        if (params.row.status !== 'sending') {
+          setReceiveButton(false);
         }
       }, [params.row.status]);
 
-      const updateSendingOrderStatus = useMutation({
-        mutationFn: ({
-          orderId,
-          productId,
-          distributorId,
-          quantity,
-        }: {
-          orderId: number;
-          productId: number;
-          distributorId: number;
-          quantity: number;
-        }) => handleSendingOrderStatus(orderId, productId, distributorId, quantity),
+      const updateReceiveOrderStatus = useMutation({
+        mutationFn: ({ orderId }: { orderId: number }) => handleReceiveOrderStatus(orderId),
         onSuccess: () => {
           queryClient.invalidateQueries({
-            queryKey: ['orders'],
-          });
-          toast.success(`Update Order ${params.row.id} successful!`);
-        },
-      });
-      const updateRejectOrderStatus = useMutation({
-        mutationFn: ({ orderId }: { orderId: number }) => handleRejectOrderStatus(orderId),
-        onSuccess: () => {
-          queryClient.invalidateQueries({
-            queryKey: ['orders'],
-          });
-          toast.success(`Approve Order ${params.row.id} successful!`);
-        },
-      });
-
-      const updateApproveOrderStatus = useMutation({
-        mutationFn: ({ orderId }: { orderId: number }) => handleApproveOrderStatus(orderId),
-        onSuccess: () => {
-          queryClient.invalidateQueries({
-            queryKey: ['orders'],
+            queryKey: ['ordersSupplier'],
           });
           toast.success(`Reject Order ${params.row.id} successful!`);
         },
       });
 
-      const handleSendingButton = (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.stopPropagation();
-        const orderId = params.row.id;
-        const productId = params.row.product.productId;
-        const distributorId = params.row.distributorId;
-        const quantity = params.row.quantity;
-        updateSendingOrderStatus.mutate({ orderId, productId, distributorId, quantity });
-      };
-      const handleApproveButton = (e: React.MouseEvent<HTMLButtonElement>) => {
+      const handleReceiveButton = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();
         const orderId = params.row.id;
 
-        updateApproveOrderStatus.mutate({ orderId });
+        updateReceiveOrderStatus.mutate({ orderId });
       };
-      const handleRejectButton = (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.stopPropagation();
-        const orderId = params.row.id;
 
-        updateRejectOrderStatus.mutate({ orderId });
-      };
       return (
         <Stack direction="row" spacing={2}>
           <Button
-            onClick={handleApproveButton}
+            onClick={handleReceiveButton}
             variant="contained"
             color={colors}
-            disabled={!approvedButton}
+            disabled={!receiveButton}
           >
-            Approve
-          </Button>
-          <Button
-            onClick={handleSendingButton}
-            variant="contained"
-            color={colors}
-            disabled={!sendingButton}
-          >
-            Send
-          </Button>
-          <Button
-            onClick={handleRejectButton}
-            variant="contained"
-            color="error"
-            disabled={!canceledButton}
-          >
-            Cancel
+            Receive
           </Button>
         </Stack>
       );
@@ -275,7 +212,7 @@ export const orderColumns: GridColDef<OrderData>[] = [
   },
 ];
 
-const OrdersDistributorsTable = () => {
+const OrdersSuppliersTable = () => {
   const [openOrderDetailModal, setOpenOrderDetailModal] = useState(false);
   const [selectedData, setSelectedData] = useState<FlattenOrderData | null>(null);
   const [searchText, setSearchText] = useState('');
@@ -283,10 +220,8 @@ const OrdersDistributorsTable = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
 
   const { isError, isLoading, data, isSuccess } = useQuery<FlattenOrderData[]>({
-    queryKey: ['orders'],
-    queryFn: () => fetchOrders(user!.id),
-    initialData: [],
-    enabled: user !== undefined,
+    queryKey: ['ordersSupplier'],
+    queryFn: () => fetchOrdersDisAndSup(user!.id),
     // staleTime: 1000 * 60 * 5,
   });
   useEffect(() => {
@@ -294,7 +229,6 @@ const OrdersDistributorsTable = () => {
 
     setUser(userData);
   }, []);
-  // apiRef.current.selectRow;
   useEffect(() => {
     if (isSuccess) {
       apiRef.current.setRows(data);
@@ -347,7 +281,6 @@ const OrdersDistributorsTable = () => {
     >
       <SimpleBar>
         <DataGrid
-          getRowId={(row) => row.id}
           onRowClick={handleRowClick}
           autoHeight={false}
           rowHeight={52}
@@ -374,7 +307,7 @@ const OrdersDistributorsTable = () => {
           }}
           slotProps={{
             toolbar: {
-              title: 'Orders',
+              title: "Supplier's Orders",
               flag: 'user',
               value: searchText,
               onChange: handleChange,
@@ -405,4 +338,4 @@ const OrdersDistributorsTable = () => {
   );
 };
 
-export default OrdersDistributorsTable;
+export default OrdersSuppliersTable;
